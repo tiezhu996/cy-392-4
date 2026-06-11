@@ -9,7 +9,8 @@ const store = useWorkStore();
     <input v-model="store.filter.keyword" placeholder="搜索作品名称或描述" />
     <select v-model="store.filter.type"><option v-for="item in CRAFT_TYPES" :key="item.value" :value="item.value">{{ item.label }}</option></select>
     <select v-model="store.filter.difficulty"><option v-for="item in DIFFICULTIES" :key="item.value" :value="item.value">{{ item.label }}</option></select>
-    <select v-model="store.filter.sort"><option value="latest">最新</option><option value="hot">最热</option></select>
+    <select v-model="store.filter.sort"><option value="latest">最新</option><option value="hot">最热</option><option value="viewed">最近浏览</option></select>
     <label><input v-model="store.filter.onlyCollected" type="checkbox" /> 收藏夹</label>
+    <label><input v-model="store.filter.onlyViewed" type="checkbox" /> 浏览历史</label>
   </section>
 </template>

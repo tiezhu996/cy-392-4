@@ -15,6 +15,9 @@ button, input, select { border: 1px solid #d1d5db; border-radius: 8px; padding: 
 .card-body h3 { margin: 0 0 6px; }
 .card-body p { color: #6b7280; font-size: 14px; }
 .meta, .actions { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.meta { flex-wrap: wrap; }
+.viewed-at { color: #059669; font-weight: 500; }
+.dark .viewed-at { color: #34d399; }
 .detail-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 20px; }
 .detail { width: min(900px, 96vw); max-height: 90vh; overflow: auto; border-radius: 8px; background: white; padding: 18px; position: relative; }
 .dark .detail { background: #1f1f1f; }

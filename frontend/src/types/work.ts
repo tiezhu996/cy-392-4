@@ -24,3 +24,8 @@ export interface CraftWork {
   collected: boolean;
   createdAt: string;
 }
+
+export interface ViewHistory {
+  id: string;
+  viewedAt: string;
+}

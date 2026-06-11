@@ -1,24 +1,36 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { mockWorks } from "../mock/works";
-import { readWorks, writeWorks } from "../storage/indexedDb";
-import type { CraftWork } from "../types/work";
+import { readWorks, writeWorks, readViewHistory, writeViewHistory } from "../storage/indexedDb";
+import type { CraftWork, ViewHistory } from "../types/work";
 import { filterWorks, type WorkFilter } from "../utils/filter";
 
 export const useWorkStore = defineStore("works", () => {
   const works = ref<CraftWork[]>([]);
-  const filter = ref<WorkFilter>({ keyword: "", type: "all", difficulty: "all", sort: "latest", onlyCollected: false });
+  const viewHistory = ref<ViewHistory[]>([]);
+  const filter = ref<WorkFilter>({ keyword: "", type: "all", difficulty: "all", sort: "latest", onlyCollected: false, onlyViewed: false });
   const selected = ref<CraftWork | null>(null);
-  const displayed = computed(() => filterWorks(works.value, filter.value));
+  const displayed = computed(() => filterWorks(works.value, filter.value, viewHistory.value));
   async function hydrate() {
     const saved = await readWorks();
     works.value = saved.length ? saved : mockWorks;
     if (!saved.length) await writeWorks(works.value);
+    const savedHistory = await readViewHistory();
+    viewHistory.value = savedHistory;
   }
   function persist() { writeWorks(works.value); }
+  function persistViewHistory() { writeViewHistory(viewHistory.value); }
   function like(id: string) { const item = works.value.find((w) => w.id === id); if (item) item.likes += 1; persist(); }
   function collect(id: string) { const item = works.value.find((w) => w.id === id); if (item) item.collected = !item.collected; persist(); }
   function follow(authorId: string) { works.value.forEach((w) => { if (w.author.id === authorId) w.author.followed = !w.author.followed; }); persist(); }
   function addWork(work: CraftWork) { works.value.unshift(work); persist(); }
-  return { works, filter, selected, displayed, hydrate, like, collect, follow, addWork };
+  function recordView(id: string) {
+    const existing = viewHistory.value.findIndex((h: ViewHistory) => h.id === id);
+    if (existing !== -1) viewHistory.value.splice(existing, 1);
+    viewHistory.value.unshift({ id, viewedAt: new Date().toISOString() });
+    if (viewHistory.value.length > 100) viewHistory.value = viewHistory.value.slice(0, 100);
+    persistViewHistory();
+  }
+  watch(selected, (work: CraftWork | null) => { if (work) recordView(work.id); });
+  return { works, viewHistory, filter, selected, displayed, hydrate, like, collect, follow, addWork, recordView };
 });
